@@ -2,6 +2,7 @@
   "name": "sample-hono-be",
   "type": "module",
   "scripts": {
+    "seed": "pnpm tsx src/db/seed.ts",
     "dev": "NODE_ENV=development tsx watch src/index.ts",
     "build": "tsc",
     "start": "NODE_ENV=production node dist/src/index.js",
