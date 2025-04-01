@@ -9,6 +9,7 @@
     "prod": "npm run build && npm run start"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.777.0",
     "@hono/node-server": "^1.14.0",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.41.0",
