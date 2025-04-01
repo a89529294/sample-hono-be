@@ -1,10 +1,13 @@
-import "dotenv/config";
+import * as dotenv from "dotenv";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { db } from "./db/index.js";
 import { usersTable } from "./db/schema.js";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+
+const envPath = `.env.${process.env.NODE_ENV}`;
+dotenv.config({ path: envPath });
 
 const app = new Hono();
 app.use("*", cors());

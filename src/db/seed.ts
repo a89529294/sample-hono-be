@@ -1,8 +1,11 @@
-import "dotenv/config";
+import * as dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq } from "drizzle-orm";
 import { usersTable } from "./schema.js";
 import { db } from "./index.js";
+
+const envPath = `.env.${process.env.NODE_ENV}`;
+dotenv.config({ path: envPath });
 
 async function main() {
   await db.delete(usersTable);
