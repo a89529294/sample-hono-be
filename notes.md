@@ -87,3 +87,14 @@ server {
     - `sudo certbot --nginx -d <domain_name>`
     - test on local machine `https:domain_name`
     - back on ec2 instance, `sudo certbot renew --dry-run`
+
+17. connect to aws rds
+    - `ssh -i xxx.pem -L 5433:rds-endpoint:5432 ubuntu@ip`, keep connection on
+    - in pgadmin, query tool workspace fill in
+      - hostname: localhost
+      - port: 5433
+      - database: postgres
+      - user: postgres
+      - password: your_secret_password
+    - once in you can create a new db, `CREATE DATABSE dbname`
+    - disconnect and then reconnect under the new db
