@@ -40,6 +40,7 @@
     - `pm2 list`
     - `pm2 save`
     - `pm2 startup`
+    - `pm2 restart hono-be`
 
 13. install and enable _nginx_
 
