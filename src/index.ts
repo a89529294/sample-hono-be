@@ -13,7 +13,7 @@ const app = new Hono();
 app.use("*", cors());
 
 const s3Client = new S3Client({
-  region: "ap-northeast-2", // Replace with your bucket's region
+  region: "ap-northeast-2",
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY!, // From IAM
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!, // From IAM
@@ -30,36 +30,36 @@ app.get("/users", async (c) => {
   return c.json({ users });
 });
 
-app.post("/upload", async (c) => {
-  const body = await c.req.parseBody();
-  const file = body["file"];
+// app.post("/upload", async (c) => {
+//   const body = await c.req.parseBody();
+//   const file = body["file"];
 
-  if (!file || !(file instanceof File)) {
-    return c.json({ error: "No file uploaded" }, 400);
-  }
+//   if (!file || !(file instanceof File)) {
+//     return c.json({ error: "No file uploaded" }, 400);
+//   }
 
-  const fileName = `${Date.now()}-${file.name}`;
-  const arrayBuffer = await file.arrayBuffer();
+//   const fileName = `${Date.now()}-${file.name}`;
+//   const arrayBuffer = await file.arrayBuffer();
 
-  // S3 upload parameters
-  const params = {
-    Bucket: "sample-hono-be-bucket", // Your bucket name
-    Key: fileName,
-    Body: Buffer.from(arrayBuffer),
-    ContentType: file.type,
-  };
+//   // S3 upload parameters
+//   const params = {
+//     Bucket: "sample-hono-be-bucket", // Your bucket name
+//     Key: fileName,
+//     Body: Buffer.from(arrayBuffer),
+//     ContentType: file.type,
+//   };
 
-  try {
-    await s3Client.send(new PutObjectCommand(params));
-    return c.json(
-      { message: "File uploaded successfully", key: fileName },
-      200
-    );
-  } catch (error) {
-    console.error(error);
-    return c.json({ error: "Upload failed" }, 500);
-  }
-});
+//   try {
+//     await s3Client.send(new PutObjectCommand(params));
+//     return c.json(
+//       { message: "File uploaded successfully", key: fileName },
+//       200
+//     );
+//   } catch (error) {
+//     console.error(error);
+//     return c.json({ error: "Upload failed" }, 500);
+//   }
+// });
 
 serve(
   {
