@@ -36,7 +36,7 @@
 12. Assuming there is a prod script.
 
     - `cd path-to-app`,
-    - `pm2 start npm --name "hono-be" -- run prod`
+    - `pm2 start pnpm --name "hono-be" -- run prod`
     - `pm2 list`
     - `pm2 save`
     - `pm2 startup`
