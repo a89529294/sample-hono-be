@@ -40,7 +40,8 @@
     - `pm2 list`
     - `pm2 save`
     - `pm2 startup`
-    - `pm2 restart hono-be`
+    - `pm2 restart hono-be` # if you need to restart hono-be
+    - `pm2 delete hono-be` # to remove entry
 
 13. install and enable _nginx_
 

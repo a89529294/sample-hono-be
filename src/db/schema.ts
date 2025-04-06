@@ -18,21 +18,21 @@ const timestamps = {
 };
 
 export const rolesTable = pgTable("roles", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   name: varchar({ length: 100 }).notNull().unique(),
   description: varchar({ length: 255 }),
   ...timestamps,
 });
 
 export const permissionsTable = pgTable("permissions", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   name: varchar({ length: 100 }).notNull().unique(),
   // Permission string like "order:create", "order:read", etc.
   ...timestamps,
 });
 
 export const usersTable = pgTable("users", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   username: varchar({ length: 255 }).notNull().unique(),
   passwordHash: varchar({ length: 255 }).notNull(),
   roleId: uuid("role_id")
@@ -42,7 +42,7 @@ export const usersTable = pgTable("users", {
 });
 
 export const sessionsTable = pgTable("sessions", {
-  id: uuid("id").primaryKey(),
+  id: varchar("id", { length: 64 }).primaryKey(),
   userId: uuid("user_id")
     .notNull()
     .references(() => usersTable.id),

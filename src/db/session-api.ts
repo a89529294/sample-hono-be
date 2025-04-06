@@ -6,10 +6,7 @@ import {
 } from "./schema.js";
 import crypto from "node:crypto";
 import { sha256 } from "@oslojs/crypto/sha2";
-import {
-  encodeBase32LowerCaseNoPadding,
-  encodeHexLowerCase,
-} from "@oslojs/encoding";
+import { encodeHexLowerCase } from "@oslojs/encoding";
 import { db } from "./index.js";
 import { eq } from "drizzle-orm";
 
@@ -72,6 +69,11 @@ export async function invalidateSession(sessionId: string): Promise<void> {
 
 export async function invalidateAllSessions(userId: string): Promise<void> {
   await db.delete(sessionsTable).where(eq(sessionsTable.userId, userId));
+}
+
+export async function getCurrentSession(sessionToken: string) {
+  const result = validateSessionToken(sessionToken);
+  return result;
 }
 
 export type SessionValidationResult =
