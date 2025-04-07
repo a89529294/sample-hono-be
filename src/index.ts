@@ -68,7 +68,7 @@ app.post("/login", async (c) => {
   return c.json({
     success: true,
     message: "Login successful",
-    token: sessionToken,
+    sessionToken: sessionToken,
     userId: user.id,
     username: user.username,
   });
