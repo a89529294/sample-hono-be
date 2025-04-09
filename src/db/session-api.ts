@@ -1,6 +1,6 @@
 import {
-  type User,
-  type Session,
+  type UserFromDb,
+  type SessionFromDb,
   sessionsTable,
   usersTable,
 } from "./schema.js";
@@ -17,9 +17,9 @@ export function generateSessionToken(): string {
 export async function createSession(
   token: string,
   userId: string
-): Promise<Session> {
+): Promise<SessionFromDb> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-  const session: Session = {
+  const session: SessionFromDb = {
     id: sessionId,
     userId,
     expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
@@ -77,7 +77,7 @@ export async function getCurrentSession(sessionToken: string) {
 }
 
 export type SessionValidationResult =
-  | { session: Session; user: User }
+  | { session: SessionFromDb; user: UserFromDb }
   | { session: null; user: null };
 
 // https://lucia-auth.com/sessions/basic-api/drizzle-orm

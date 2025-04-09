@@ -3,9 +3,13 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { db } from "./db/index.js";
-import { usersTable } from "./db/schema.js";
+import {
+  usersTable,
+  type SessionFromDb,
+  type UserFromDb,
+} from "./db/schema.js";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getUserFromUsername } from "./db/user.js";
+import { getUserFromAccount } from "./db/user.js";
 import { verifyPasswordHash } from "./db/password.js";
 import {
   createSession,
@@ -14,12 +18,21 @@ import {
   invalidateAllSessions,
   invalidateSession,
 } from "./db/session-api.js";
+import { authenticate } from "./middleware/auth.js";
+
+import production from "./production.js";
+import personnelPermission from "./personnel-permission.js";
+import basicInfo from "./basic-info.js";
+import storage from "./storage.js";
 
 const envPath = `.env.${process.env.NODE_ENV}`;
 dotenv.config({ path: envPath });
 
 const app = new Hono();
 app.use("*", cors());
+
+// Apply authentication middleware to all routes
+app.use("*", authenticate);
 
 const s3Client = new S3Client({
   region: "ap-northeast-2",
@@ -42,11 +55,11 @@ app.get("/users", async (c) => {
 app.post("/login", async (c) => {
   const body = await c.req.json();
 
-  if (!body.username || !body.password) {
-    return c.json({ error: "Username and password are required" }, 400);
+  if (!body.account || !body.password) {
+    return c.json({ error: "Account and password are required" }, 400);
   }
 
-  const user = await getUserFromUsername(body.username);
+  const user = await getUserFromAccount(body.account);
 
   if (!user) {
     return c.json({ error: "Invalid credentials" }, 401);
@@ -69,33 +82,43 @@ app.post("/login", async (c) => {
     success: true,
     message: "Login successful",
     sessionToken: sessionToken,
-    userId: user.id,
-    username: user.username,
+    user: {
+      id: user.id,
+      account: user.account,
+      name: user.name,
+    },
   });
 });
 
 app.get("/logout", async (c) => {
-  const headerRecord = c.req.header();
-  const sessionToken = headerRecord.authorization?.split(" ")[1];
-
-  if (!sessionToken)
-    return c.json(
-      {
-        error: "Missing Authorization: Bearer <session_id>",
-      },
-      400
-    );
-
-  const { session } = await getCurrentSession(sessionToken);
-
-  if (!session) return c.json({ error: "No active session" }, 400);
+  // User and session are already attached to context by the middleware
+  const session = c.get("session");
 
   await invalidateSession(session.id);
 
   return c.json({
-    succes: true,
+    success: true,
   });
 });
+
+app.get("/me", async (c) => {
+  // User is already attached to context by the middleware
+  const user = c.get("user");
+
+  return c.json({
+    success: true,
+    user: {
+      id: user.id,
+      account: user.account,
+      name: user.name,
+    },
+  });
+});
+
+app.route("/production", production);
+app.route("/personnel-permission", personnelPermission);
+app.route("/basic-info", basicInfo);
+app.route("/storage", storage);
 
 // app.post("/upload", async (c) => {
 //   const body = await c.req.parseBody();

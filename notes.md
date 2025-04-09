@@ -4,6 +4,7 @@
 
 2. in instance creation tab, generate a key pair. The private key will be downloaded to your local machine.
 3. `ssh -i path-to-private-key ubuntu@ip`
+   - remember to also save the `.pem` file into bitwarden's aws-key folder.
 
 - if you run into a permission error, `chmod 400 /Users/albertchang/Downloads/sample-hono-be-key-pair.pem`
 

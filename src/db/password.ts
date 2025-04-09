@@ -15,3 +15,5 @@ export async function verifyPasswordHash(
 ): Promise<boolean> {
   return await verify(hash, password);
 }
+
+console.log(await hashPassword("LiAkR4j7ipQHRP4RJITO"));

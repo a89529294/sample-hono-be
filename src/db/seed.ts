@@ -5,7 +5,14 @@ import {
   usersTable,
   rolesTable,
   permissionsTable,
-  rolePermissionsTable,
+  sessionsTable,
+  customersTable,
+  projectsTable,
+  contactsTable,
+  projectContactsTable,
+  departmentsTable,
+  userDepartmentsTable,
+  roleDepartmentsTable,
 } from "./schema.js";
 import { db } from "./index.js";
 import { randomUUID } from "crypto";
@@ -14,116 +21,363 @@ import { randomUUID } from "crypto";
 // dotenv.config({ path: envPath });
 
 async function main() {
-  // Clean existing data
-  await db.delete(rolePermissionsTable);
+  console.log("Starting database seed...");
+
+  // Clean existing data in the correct order (respecting foreign key constraints)
+  console.log("Cleaning existing data...");
+
+  // First delete tables that reference other tables
+  await db.delete(sessionsTable);
+  await db.delete(projectContactsTable);
+  await db.delete(projectsTable);
+  await db.delete(contactsTable);
+  await db.delete(customersTable);
+  await db.delete(userDepartmentsTable);
+  await db.delete(roleDepartmentsTable);
   await db.delete(usersTable);
   await db.delete(permissionsTable);
+  await db.delete(departmentsTable);
   await db.delete(rolesTable);
 
-  // Create roles with predefined IDs
-  const adminRoleId = randomUUID();
-  const userRoleId = randomUUID();
+  console.log("All tables cleaned!");
 
-  const roles: (typeof rolesTable.$inferInsert)[] = [
+  // Create roles with predefined IDs
+  const productionManagementRoleId = randomUUID();
+  const personnelPermissionManagementRoleId = randomUUID();
+  const basicInfoManagementRoleId = randomUUID();
+  const storageManagementRoleId = randomUUID();
+
+  const roles = [
     {
-      id: adminRoleId,
-      name: "Admin",
-      description: "Administrator with full access",
+      id: productionManagementRoleId,
+      name: "ProductionManagement",
+      description: "Production Management",
     },
     {
-      id: userRoleId,
-      name: "User",
-      description: "Regular user with limited access",
+      id: personnelPermissionManagementRoleId,
+      name: "PersonnelPermissionManagement",
+      description: "Personnel and Permission Management",
+    },
+    {
+      id: basicInfoManagementRoleId,
+      name: "BasicInfoManagement",
+      description: "Basic Information Management",
+    },
+    {
+      id: storageManagementRoleId,
+      name: "StorageManagement",
+      description: "Storage Management",
     },
   ];
 
   await db.insert(rolesTable).values(roles);
   console.log("Roles created!");
 
-  // Create permissions with predefined IDs
-  const allAllPermId = randomUUID();
-  const orderCreatePermId = randomUUID();
-  const orderReadPermId = randomUUID();
-  const orderUpdatePermId = randomUUID();
-  const orderDeletePermId = randomUUID();
-  const userCreatePermId = randomUUID();
-  const userReadPermId = randomUUID();
-  const userUpdatePermId = randomUUID();
-  const userDeletePermId = randomUUID();
+  // Create departments
+  const hrDeptId = randomUUID();
+  const financeDeptId = randomUUID();
+  const marketingDeptId = randomUUID();
+  const salesDeptId = randomUUID();
+  const engineeringDeptId = randomUUID();
+  const productDeptId = randomUUID();
+  const operationsDeptId = randomUUID();
+  const customerServiceDeptId = randomUUID();
+  const researchDeptId = randomUUID();
+  const legalDeptId = randomUUID();
+  const adminDeptId = randomUUID();
 
-  const permissions: (typeof permissionsTable.$inferInsert)[] = [
+  const departments = [
     {
-      id: allAllPermId,
-      name: "all:all",
+      id: adminDeptId,
+      name: "Administration",
     },
     {
-      id: orderCreatePermId,
-      name: "order:create",
+      id: hrDeptId,
+      name: "Human Resources",
     },
     {
-      id: orderReadPermId,
-      name: "order:read",
+      id: financeDeptId,
+      name: "Finance",
     },
     {
-      id: orderUpdatePermId,
-      name: "order:update",
+      id: marketingDeptId,
+      name: "Marketing",
     },
     {
-      id: orderDeletePermId,
-      name: "order:delete",
+      id: salesDeptId,
+      name: "Sales",
     },
     {
-      id: userCreatePermId,
-      name: "user:create",
+      id: engineeringDeptId,
+      name: "Engineering",
     },
     {
-      id: userReadPermId,
-      name: "user:read",
+      id: productDeptId,
+      name: "Product",
     },
     {
-      id: userUpdatePermId,
-      name: "user:update",
+      id: operationsDeptId,
+      name: "Operations",
     },
     {
-      id: userDeletePermId,
-      name: "user:delete",
+      id: customerServiceDeptId,
+      name: "Customer Service",
+    },
+    {
+      id: researchDeptId,
+      name: "Research & Development",
+    },
+    {
+      id: legalDeptId,
+      name: "Legal",
+    },
+  ];
+
+  await db.insert(departmentsTable).values(departments);
+  console.log("Departments created!");
+
+  // Create role-department associations
+  const roleDepartments = [
+    // Production Management role in Engineering, Operations, and R&D departments
+    {
+      id: randomUUID(),
+      roleId: productionManagementRoleId,
+      departmentId: engineeringDeptId,
+    },
+    {
+      id: randomUUID(),
+      roleId: productionManagementRoleId,
+      departmentId: operationsDeptId,
+    },
+    {
+      id: randomUUID(),
+      roleId: productionManagementRoleId,
+      departmentId: researchDeptId,
+    },
+
+    // Personnel Management role in HR department
+    {
+      id: randomUUID(),
+      roleId: personnelPermissionManagementRoleId,
+      departmentId: hrDeptId,
+    },
+
+    // Basic Info Management role in multiple departments
+    {
+      id: randomUUID(),
+      roleId: basicInfoManagementRoleId,
+      departmentId: hrDeptId,
+    },
+    {
+      id: randomUUID(),
+      roleId: basicInfoManagementRoleId,
+      departmentId: operationsDeptId,
+    },
+    {
+      id: randomUUID(),
+      roleId: basicInfoManagementRoleId,
+      departmentId: productDeptId,
+    },
+
+    // Storage Management role in Operations department
+    {
+      id: randomUUID(),
+      roleId: storageManagementRoleId,
+      departmentId: operationsDeptId,
+    },
+  ];
+
+  await db.insert(roleDepartmentsTable).values(roleDepartments);
+  console.log("Role-Department associations created!");
+
+  // Create permissions with roleId (now a one-to-many relationship)
+  const permissions = [
+    // Production Management permissions
+    {
+      id: randomUUID(),
+      name: "production:create",
+      roleId: productionManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "production:read",
+      roleId: productionManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "production:update",
+      roleId: productionManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "production:delete",
+      roleId: productionManagementRoleId,
+    },
+
+    // Personnel Permission Management permissions
+    {
+      id: randomUUID(),
+      name: "personnelPermission:create",
+      roleId: personnelPermissionManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "personnelPermission:read",
+      roleId: personnelPermissionManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "personnelPermission:update",
+      roleId: personnelPermissionManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "personnelPermission:delete",
+      roleId: personnelPermissionManagementRoleId,
+    },
+
+    // Basic Info Management permissions
+    {
+      id: randomUUID(),
+      name: "employee:create",
+      roleId: basicInfoManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "employee:read",
+      roleId: basicInfoManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "employee:update",
+      roleId: basicInfoManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "employee:delete",
+      roleId: basicInfoManagementRoleId,
+    },
+
+    // Storage Management permissions
+    {
+      id: randomUUID(),
+      name: "storage:create",
+      roleId: storageManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "storage:read",
+      roleId: storageManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "storage:update",
+      roleId: storageManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: "storage:delete",
+      roleId: storageManagementRoleId,
     },
   ];
 
   await db.insert(permissionsTable).values(permissions);
   console.log("Permissions created!");
 
-  // Assign permissions to roles
-  const rolePermissions: (typeof rolePermissionsTable.$inferInsert)[] = [
-    // Admin has the all:all permission
-    { roleId: adminRoleId, permissionId: allAllPermId },
-
-    // Regular user has limited permissions
-    { roleId: userRoleId, permissionId: orderReadPermId },
-    { roleId: userRoleId, permissionId: userReadPermId },
-  ];
-
-  await db.insert(rolePermissionsTable).values(rolePermissions);
-  console.log("Role permissions assigned!");
-
   // Create users
-  const users: (typeof usersTable.$inferInsert)[] = [
+  const hrUserId = randomUUID();
+  const financeUserId = randomUUID();
+  const marketingUserId = randomUUID();
+  const salesUserId = randomUUID();
+  const engineeringUserId = randomUUID();
+  const adminUserId = randomUUID();
+
+  const users = [
     {
-      username: "admin",
+      id: adminUserId,
+      account: "admin",
+      name: "Administrator",
       passwordHash:
-        "$argon2id$v=19$m=19456,t=2,p=1$Gr/CF7ucnfCYIxW6BuJ+CQ$uQP2AY4I6DeuOjXfQRNn0LoR4mQBSQC/Xya+4diGKB8",
-      roleId: adminRoleId,
+        "$argon2id$v=19$m=19456,t=2,p=1$8gKO7uPcSTzd77IIArp0pw$CgAihf3UZY0tbFMNHq/Zf1HkmtBdG4j1Vpm9BuSqaEI",
     },
     {
-      username: "user1",
+      id: hrUserId,
+      account: "hr",
+      name: "HR Manager",
       passwordHash:
-        "$argon2id$v=19$m=19456,t=2,p=1$T9cJGtEoYBtEEouLcqJduQ$PzZpQ54pwgLcknUz6Mw8+RjJQ2hOAof4eJUGgi1e4j8",
-      roleId: userRoleId,
+        "$argon2id$v=19$m=19456,t=2,p=1$8gKO7uPcSTzd77IIArp0pw$CgAihf3UZY0tbFMNHq/Zf1HkmtBdG4j1Vpm9BuSqaEI",
+    },
+    {
+      id: financeUserId,
+      account: "finance",
+      name: "Finance Manager",
+      passwordHash:
+        "$argon2id$v=19$m=19456,t=2,p=1$8gKO7uPcSTzd77IIArp0pw$CgAihf3UZY0tbFMNHq/Zf1HkmtBdG4j1Vpm9BuSqaEI",
+    },
+    {
+      id: marketingUserId,
+      account: "marketing",
+      name: "Marketing Manager",
+      passwordHash:
+        "$argon2id$v=19$m=19456,t=2,p=1$8gKO7uPcSTzd77IIArp0pw$CgAihf3UZY0tbFMNHq/Zf1HkmtBdG4j1Vpm9BuSqaEI",
+    },
+    {
+      id: salesUserId,
+      account: "sales",
+      name: "Sales Manager",
+      passwordHash:
+        "$argon2id$v=19$m=19456,t=2,p=1$8gKO7uPcSTzd77IIArp0pw$CgAihf3UZY0tbFMNHq/Zf1HkmtBdG4j1Vpm9BuSqaEI",
+    },
+    {
+      id: engineeringUserId,
+      account: "engineering",
+      name: "Engineering Manager",
+      passwordHash:
+        "$argon2id$v=19$m=19456,t=2,p=1$8gKO7uPcSTzd77IIArp0pw$CgAihf3UZY0tbFMNHq/Zf1HkmtBdG4j1Vpm9BuSqaEI",
     },
   ];
 
   await db.insert(usersTable).values(users);
   console.log("Users created!");
+
+  // Create user-department associations
+  const userDepartments = [
+    {
+      id: randomUUID(),
+      userId: adminUserId,
+      departmentId: adminDeptId,
+    },
+    {
+      id: randomUUID(),
+      userId: hrUserId,
+      departmentId: hrDeptId,
+    },
+    {
+      id: randomUUID(),
+      userId: financeUserId,
+      departmentId: financeDeptId,
+    },
+    {
+      id: randomUUID(),
+      userId: marketingUserId,
+      departmentId: marketingDeptId,
+    },
+    {
+      id: randomUUID(),
+      userId: salesUserId,
+      departmentId: salesDeptId,
+    },
+    {
+      id: randomUUID(),
+      userId: engineeringUserId,
+      departmentId: engineeringDeptId,
+    },
+  ];
+
+  await db.insert(userDepartmentsTable).values(userDepartments);
+  console.log("User-Department associations created!");
+
+  console.log("Database seed completed successfully!");
 }
 
 main();
