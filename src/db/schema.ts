@@ -34,7 +34,7 @@ const timestampsWithDeletedAt = {
 export const rolesTable = pgTable("roles", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar({ length: 100 }).notNull().unique(),
-  description: varchar({ length: 255 }),
+  chinese_name: varchar({ length: 255 }),
   ...timestamps,
 });
 
@@ -58,7 +58,8 @@ export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   account: varchar({ length: 255 }).notNull().unique(),
   name: varchar({ length: 255 }).notNull(),
-  passwordHash: varchar({ length: 255 }).notNull(),
+  // users with no password cannot login to erp
+  passwordHash: varchar({ length: 255 }),
   ...timestamps,
 });
 
@@ -211,27 +212,33 @@ export const usersRelations = relations(usersTable, ({ many }) => ({
   sessions: many(sessionsTable),
 }));
 
-export const userDepartmentsRelations = relations(userDepartmentsTable, ({ one }) => ({
-  user: one(usersTable, {
-    fields: [userDepartmentsTable.userId],
-    references: [usersTable.id],
-  }),
-  department: one(departmentsTable, {
-    fields: [userDepartmentsTable.departmentId],
-    references: [departmentsTable.id],
-  }),
-}));
+export const userDepartmentsRelations = relations(
+  userDepartmentsTable,
+  ({ one }) => ({
+    user: one(usersTable, {
+      fields: [userDepartmentsTable.userId],
+      references: [usersTable.id],
+    }),
+    department: one(departmentsTable, {
+      fields: [userDepartmentsTable.departmentId],
+      references: [departmentsTable.id],
+    }),
+  })
+);
 
-export const roleDepartmentsRelations = relations(roleDepartmentsTable, ({ one }) => ({
-  role: one(rolesTable, {
-    fields: [roleDepartmentsTable.roleId],
-    references: [rolesTable.id],
-  }),
-  department: one(departmentsTable, {
-    fields: [roleDepartmentsTable.departmentId],
-    references: [departmentsTable.id],
-  }),
-}));
+export const roleDepartmentsRelations = relations(
+  roleDepartmentsTable,
+  ({ one }) => ({
+    role: one(rolesTable, {
+      fields: [roleDepartmentsTable.roleId],
+      references: [rolesTable.id],
+    }),
+    department: one(departmentsTable, {
+      fields: [roleDepartmentsTable.departmentId],
+      references: [departmentsTable.id],
+    }),
+  })
+);
 
 export const sessionsRelations = relations(sessionsTable, ({ one }) => ({
   user: one(usersTable, {
@@ -248,7 +255,13 @@ export type SessionFromDb = InferSelectModel<typeof sessionsTable>;
 export type CustomerFromDb = InferSelectModel<typeof customersTable>;
 export type ProjectFromDb = InferSelectModel<typeof projectsTable>;
 export type ContactFromDb = InferSelectModel<typeof contactsTable>;
-export type ProjectContactFromDb = InferSelectModel<typeof projectContactsTable>;
+export type ProjectContactFromDb = InferSelectModel<
+  typeof projectContactsTable
+>;
 export type DepartmentFromDb = InferSelectModel<typeof departmentsTable>;
-export type UserDepartmentFromDb = InferSelectModel<typeof userDepartmentsTable>;
-export type RoleDepartmentFromDb = InferSelectModel<typeof roleDepartmentsTable>;
+export type UserDepartmentFromDb = InferSelectModel<
+  typeof userDepartmentsTable
+>;
+export type RoleDepartmentFromDb = InferSelectModel<
+  typeof roleDepartmentsTable
+>;

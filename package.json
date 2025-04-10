@@ -4,8 +4,8 @@
   "scripts": {
     "db:push:dev": "NODE_ENV=dev pnpm drizzle-kit push",
     "db:push:prod": "NODE_ENV=prod pnpm drizzle-kit push",
-    "seed:dev": "NODE_ENV=dev pnpm tsx src/db/seed.ts",
-    "seed:prod": "NODE_ENV=prod pnpm tsx src/db/seed.ts",
+    "db:seed:dev": "NODE_ENV=dev pnpm tsx src/db/seed.ts",
+    "db:seed:prod": "NODE_ENV=prod pnpm tsx src/db/seed.ts",
     "dev": "NODE_ENV=dev tsx watch src/index.ts",
     "build": "tsc",
     "start": "NODE_ENV=prod node dist/src/index.js",

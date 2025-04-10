@@ -51,22 +51,22 @@ async function main() {
     {
       id: productionManagementRoleId,
       name: "ProductionManagement",
-      description: "Production Management",
+      chinese_name: "生產管理",
     },
     {
       id: personnelPermissionManagementRoleId,
       name: "PersonnelPermissionManagement",
-      description: "Personnel and Permission Management",
+      chinese_name: "人事權限",
     },
     {
       id: basicInfoManagementRoleId,
       name: "BasicInfoManagement",
-      description: "Basic Information Management",
+      chinese_name: "基本資料",
     },
     {
       id: storageManagementRoleId,
       name: "StorageManagement",
-      description: "Storage Management",
+      chinese_name: "倉庫管理",
     },
   ];
 

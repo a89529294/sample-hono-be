@@ -2,23 +2,17 @@ import * as dotenv from "dotenv";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { db } from "./db/index.js";
-import {
-  usersTable,
-  type SessionFromDb,
-  type UserFromDb,
-} from "./db/schema.js";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getUserFromAccount } from "./db/user.js";
 import { verifyPasswordHash } from "./db/password.js";
 import {
   createSession,
   generateSessionToken,
-  getCurrentSession,
   invalidateAllSessions,
   invalidateSession,
 } from "./db/session-api.js";
-import { authenticate } from "./middleware/auth.js";
+import { authenticate } from "./helpers/auth.js";
+import { getUserRoles } from "./helpers/auth.js";
 
 import production from "./production.js";
 import personnelPermission from "./personnel-permission.js";
@@ -34,22 +28,8 @@ app.use("*", cors());
 // Apply authentication middleware to all routes
 app.use("*", authenticate);
 
-const s3Client = new S3Client({
-  region: "ap-northeast-2",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY!, // From IAM
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!, // From IAM
-  },
-});
-
 app.get("/", (c) => {
   return c.json({ success: true });
-});
-
-app.get("/users", async (c) => {
-  const users = await db.select().from(usersTable);
-
-  return c.json({ users });
 });
 
 app.post("/login", async (c) => {
@@ -78,14 +58,15 @@ app.post("/login", async (c) => {
 
   await createSession(sessionToken, user.id);
 
+  const roles = await getUserRoles(user.id);
+
   return c.json({
     success: true,
     message: "Login successful",
     sessionToken: sessionToken,
     user: {
-      id: user.id,
-      account: user.account,
-      name: user.name,
+      ...user,
+      roles,
     },
   });
 });
@@ -105,12 +86,14 @@ app.get("/me", async (c) => {
   // User is already attached to context by the middleware
   const user = c.get("user");
 
+  // Get user roles
+  const roles = await getUserRoles(user.id);
+
   return c.json({
     success: true,
     user: {
-      id: user.id,
-      account: user.account,
-      name: user.name,
+      ...user,
+      roles: roles,
     },
   });
 });
@@ -119,6 +102,14 @@ app.route("/production", production);
 app.route("/personnel-permission", personnelPermission);
 app.route("/basic-info", basicInfo);
 app.route("/storage", storage);
+
+// const s3Client = new S3Client({
+//   region: "ap-northeast-2",
+//   credentials: {
+//     accessKeyId: process.env.AWS_ACCESS_KEY!, // From IAM
+//     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!, // From IAM
+//   },
+// });
 
 // app.post("/upload", async (c) => {
 //   const body = await c.req.parseBody();

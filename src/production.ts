@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { hasPermission } from "./middleware/auth.js";
+import { hasPermission } from "./helpers/auth.js";
 
 const app = new Hono();
 
