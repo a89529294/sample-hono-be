@@ -65,7 +65,7 @@ export const appRouter = t.router({
 
 type AppRouter = typeof appRouter;
 
-export declare namespace TrpcTypes {
-  export type Router = AppRouter;
-  export type User = AppRouter['login']['_def']['$types']['output']['user'];
-}
+export type TrpcTypes = {
+  Router: AppRouter;
+  User: AppRouter['login']['_def']['$types']['output']['user'];
+};
