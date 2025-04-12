@@ -14,19 +14,12 @@ export const appRouter = t.router({
   login: t.procedure
     .input(
       z.object({
-        account: z.string(),
-        password: z.string(),
+        account: z.string().min(1, { message: 'Account is required' }),
+        password: z.string().min(1, { message: 'Password is required' }),
       }),
     )
     .mutation(async ({ input, ctx }) => {
       // const {c} = ctx
-
-      if (!input.account || !input.password) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Account and password are required',
-        });
-      }
 
       const user = await getUserFromAccount(input.account);
 
@@ -71,3 +64,5 @@ export const appRouter = t.router({
 });
 
 export type AppRouter = typeof appRouter;
+
+export type User = AppRouter['login']['_def']['$types']['output']['user'];
