@@ -45,7 +45,9 @@ export const appRouter = t.router({
 
       const user = await getUserFromAccount(input.account);
 
-      if (!user) {
+      // if user doesnt exist or user doesnt have a password
+      // i.e. not an app user, block
+      if (!user || !user.passwordHash) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'Invalid credentials',
@@ -74,7 +76,9 @@ export const appRouter = t.router({
         message: 'Login successful',
         sessionToken: sessionToken,
         user: {
-          ...user,
+          account: user.account,
+          id: user.id,
+          name: user.name,
           roles: roles,
         },
       };

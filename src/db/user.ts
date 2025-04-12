@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { db } from './index.js';
-import { type User, usersTable } from './schema.js';
+import { type UserFromDb, usersTable } from './schema.js';
 
-export async function getUserFromAccount(account: string): Promise<User | null> {
+export async function getUserFromAccount(account: string): Promise<UserFromDb | null> {
   try {
     const users = await db.select().from(usersTable).where(eq(usersTable.account, account)).limit(1);
 
