@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup';
 
 const tsupConfig = defineConfig({
   entry: ['trpc-api-export/builder/index.ts'],
-  outDir: 'trpc-api-export/dist',
+  outDir: 'trpc-api-export/build',
   format: ['esm'],
   clean: true,
   dts: true,
