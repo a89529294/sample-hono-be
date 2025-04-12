@@ -25,6 +25,7 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<
           account: string;
           id: string;
           name: string;
+          isAdmin: boolean;
           roles: {
             id: string;
             name: string;
