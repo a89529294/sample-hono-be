@@ -34,6 +34,20 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<
         };
       };
     }>;
+    me: _trpc_server.TRPCQueryProcedure<{
+      input: void;
+      output: {
+        account: string;
+        id: string;
+        name: string;
+        isAdmin: boolean;
+        roles: {
+          id: string;
+          name: string;
+          chinese_name: string | null;
+        }[];
+      };
+    }>;
   }>
 >;
 type AppRouter = typeof appRouter;
