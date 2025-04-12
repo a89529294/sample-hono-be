@@ -10,7 +10,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "trpc-api-export": "tsup --config trpc-api-export/builder/tsup.config.ts && npm run format-fix",
+    "trpc-api-export": "tsup --config trpc-api-export/builder/tsup.config.ts && npm run format-fix && git a trpc-api-export/build/index.d.ts && git c -m 'update types' && git p",
     "db:push:dev": "NODE_ENV=dev pnpm drizzle-kit push",
     "db:push:prod": "NODE_ENV=prod pnpm drizzle-kit push",
     "db:seed:dev": "NODE_ENV=dev pnpm tsx src/db/seed.ts",

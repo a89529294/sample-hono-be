@@ -29,41 +29,41 @@ app.get('/', (c) => {
   return c.json({ success: true });
 });
 
-app.post('/login', async (c) => {
-  const body = await c.req.json();
+// app.post('/login', async (c) => {
+//   const body = await c.req.json();
 
-  if (!body.account || !body.password) {
-    return c.json({ error: 'Account and password are required' }, 400);
-  }
+//   if (!body.account || !body.password) {
+//     return c.json({ error: 'Account and password are required' }, 400);
+//   }
 
-  const user = await getUserFromAccount(body.account);
+//   const user = await getUserFromAccount(body.account);
 
-  if (!user) {
-    return c.json({ error: 'Invalid credentials' }, 401);
-  }
+//   if (!user) {
+//     return c.json({ error: 'Invalid credentials' }, 401);
+//   }
 
-  const passwordMatch = await verifyPasswordHash(user.passwordHash, body.password);
+//   const passwordMatch = await verifyPasswordHash(user.passwordHash, body.password);
 
-  if (!passwordMatch) return c.json({ error: 'Invalid credentials' }, 401);
+//   if (!passwordMatch) return c.json({ error: 'Invalid credentials' }, 401);
 
-  await invalidateAllSessions(user.id);
+//   await invalidateAllSessions(user.id);
 
-  const sessionToken = generateSessionToken();
+//   const sessionToken = generateSessionToken();
 
-  await createSession(sessionToken, user.id);
+//   await createSession(sessionToken, user.id);
 
-  const roles = await getUserRoles(user.id);
+//   const roles = await getUserRoles(user.id);
 
-  return c.json({
-    success: true,
-    message: 'Login successful',
-    sessionToken: sessionToken,
-    user: {
-      ...user,
-      roles,
-    },
-  });
-});
+//   return c.json({
+//     success: true,
+//     message: 'Login successful',
+//     sessionToken: sessionToken,
+//     user: {
+//       ...user,
+//       roles,
+//     },
+//   });
+// });
 
 app.get('/logout', async (c) => {
   // User and session are already attached to context by the middleware
@@ -76,21 +76,21 @@ app.get('/logout', async (c) => {
   });
 });
 
-app.get('/me', async (c) => {
-  // User is already attached to context by the middleware
-  const user = c.get('user');
+// app.get('/me', async (c) => {
+//   // User is already attached to context by the middleware
+//   const user = c.get('user');
 
-  // Get user roles
-  const roles = await getUserRoles(user.id);
+//   // Get user roles
+//   const roles = await getUserRoles(user.id);
 
-  return c.json({
-    success: true,
-    user: {
-      ...user,
-      roles: roles,
-    },
-  });
-});
+//   return c.json({
+//     success: true,
+//     user: {
+//       ...user,
+//       roles: roles,
+//     },
+//   });
+// });
 
 app.route('/production', production);
 app.route('/personnel-permission', personnelPermission);
@@ -101,7 +101,7 @@ app.use(
   '/trpc/*',
   trpcServer({
     router: appRouter,
-    createContext: (c) => ({ c }), // Pass Hono context to tRPC
+    createContext: (_opts, c) => ({ c }), // Pass Hono context to tRPC
   }),
 );
 
