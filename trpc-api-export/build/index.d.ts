@@ -36,5 +36,9 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<
   }>
 >;
 type AppRouter = typeof appRouter;
+declare namespace TrpcTypes {
+  type Router = AppRouter;
+  type User = AppRouter['login']['_def']['$types']['output']['user'];
+}
 
-export type { AppRouter };
+export { TrpcTypes };
