@@ -7,21 +7,6 @@ import { getUserFromAccount } from './db/user.js';
 import { verifyPasswordHash } from './db/password.js';
 import { createSession, generateSessionToken, invalidateAllSessions } from './db/session-api.js';
 import { getUserRoles } from './helpers/auth.js';
-// import { type AppRouter } from "hono-react-api-types";
-
-export interface UserResponse {
-  id: string;
-  account: string;
-  name: string;
-  roles: string[];
-}
-
-export interface LoginResponse {
-  success: boolean;
-  message: string;
-  sessionToken: string;
-  user: UserResponse;
-}
 
 const t = initTRPC.context<{ c: Context }>().create();
 
