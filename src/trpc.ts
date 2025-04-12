@@ -81,8 +81,6 @@ export const appRouter = t.router({
 
 type AppRouter = typeof appRouter;
 
-console.log('?');
-
 export type TrpcTypes = {
   Router: AppRouter;
   User: AppRouter['login']['_def']['$types']['output']['user'];

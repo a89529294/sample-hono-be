@@ -98,7 +98,7 @@ export async function isAdmin(userId: string) {
  */
 export const authenticate: MiddlewareHandler = async (c, next) => {
   // Skip authentication for public routes
-  if (c.req.path === '/' || c.req.path === '/login' || c.req.path === '/trpc/login') {
+  if (c.req.path === '/' || c.req.path === '/trpc/login') {
     return next();
   }
 
