@@ -34,7 +34,7 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<
         };
       };
     }>;
-    me: _trpc_server.TRPCQueryProcedure<{
+    me: _trpc_server.TRPCMutationProcedure<{
       input: void;
       output: {
         account: string;
