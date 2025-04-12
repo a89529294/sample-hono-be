@@ -1,11 +1,11 @@
 {
   "name": "sample-hono-be",
   "type": "module",
-  "main": "./trpc-api-export/dist/index.js",
-  "exports": "./trpc-api-export/dist/index.js",
-  "types": "./trpc-api-export/dist/index.d.ts",
+  "main": "./trpc-api-export/build/index.js",
+  "exports": "./trpc-api-export/build/index.js",
+  "types": "./trpc-api-export/build/index.d.ts",
   "files": [
-    "trpc-api-export/dist",
+    "trpc-api-export/build",
     "README.md"
   ],
   "sideEffects": false,
