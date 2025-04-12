@@ -33,7 +33,6 @@ export const appRouter = t.router({
         password: z.string(),
       }),
     )
-    .output(z.custom<LoginResponse>())
     .mutation(async ({ input, ctx }) => {
       // const {c} = ctx
 
@@ -76,7 +75,7 @@ export const appRouter = t.router({
         sessionToken: sessionToken,
         user: {
           ...user,
-          roles,
+          roles: roles,
         },
       };
     }),
