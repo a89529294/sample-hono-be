@@ -1,6 +1,6 @@
-import { and, eq, inArray } from "drizzle-orm";
-import type { MiddlewareHandler } from "hono";
-import { db } from "../db/index.js";
+import { and, eq, inArray } from 'drizzle-orm';
+import type { MiddlewareHandler } from 'hono';
+import { db } from '../db/index.js';
 import {
   departmentsTable,
   permissionsTable,
@@ -9,15 +9,15 @@ import {
   userDepartmentsTable,
   type SessionFromDb,
   type UserFromDb,
-} from "../db/schema.js";
-import { getCurrentSession } from "../db/session-api.js";
+} from '../db/schema.js';
+import { getCurrentSession } from '../db/session-api.js';
 
-type User = Omit<UserFromDb, "passwordHash" | "created_at" | "updated_at"> & {
+type User = Omit<UserFromDb, 'passwordHash' | 'created_at' | 'updated_at'> & {
   isAdmin: boolean;
 };
 type Session = SessionFromDb;
 
-declare module "hono" {
+declare module 'hono' {
   interface ContextVariableMap {
     user: User;
     session: Session;
@@ -74,7 +74,7 @@ export async function isAdmin(userId: string) {
   const adminDept = await db
     .select()
     .from(departmentsTable)
-    .where(eq(departmentsTable.name, "Administration"))
+    .where(eq(departmentsTable.name, 'Administration'))
     .limit(1);
 
   if (adminDept.length === 0) return false;
@@ -85,12 +85,7 @@ export async function isAdmin(userId: string) {
   const userInAdminDept = await db
     .select()
     .from(userDepartmentsTable)
-    .where(
-      and(
-        eq(userDepartmentsTable.userId, userId),
-        eq(userDepartmentsTable.departmentId, adminDeptId)
-      )
-    )
+    .where(and(eq(userDepartmentsTable.userId, userId), eq(userDepartmentsTable.departmentId, adminDeptId)))
     .limit(1);
 
   return userInAdminDept.length === 1;
@@ -103,21 +98,21 @@ export async function isAdmin(userId: string) {
  */
 export const authenticate: MiddlewareHandler = async (c, next) => {
   // Skip authentication for public routes
-  if (c.req.path === "/" || c.req.path === "/login") {
+  if (c.req.path === '/' || c.req.path === '/login' || c.req.path === '/trpc/login') {
     return next();
   }
 
   const headerRecord = c.req.header();
   const authHeader = headerRecord.authorization;
-  const sessionToken = authHeader?.split(" ")[1];
+  const sessionToken = authHeader?.split(' ')[1];
 
   if (!sessionToken) {
     return c.json(
       {
-        error: "Authentication required",
-        message: "Missing Authorization: Bearer <session_token>",
+        error: 'Authentication required',
+        message: 'Missing Authorization: Bearer <session_token>',
       },
-      401
+      401,
     );
   }
 
@@ -126,20 +121,20 @@ export const authenticate: MiddlewareHandler = async (c, next) => {
   if (!session || !user) {
     return c.json(
       {
-        error: "Authentication failed",
-        message: "Invalid or expired session",
+        error: 'Authentication failed',
+        message: 'Invalid or expired session',
       },
-      401
+      401,
     );
   }
 
   const isUserAdmin = await isAdmin(user.id);
 
-  c.set("user", {
+  c.set('user', {
     ...user,
     isAdmin: isUserAdmin,
   });
-  c.set("session", session as Session);
+  c.set('session', session as Session);
 
   await next();
 };
@@ -150,10 +145,7 @@ export const authenticate: MiddlewareHandler = async (c, next) => {
  * @param permissionName - The permission to check for
  * @returns A boolean indicating whether the user has the permission
  */
-export async function hasPermission(
-  userId: string,
-  permissionName: string
-): Promise<boolean> {
+export async function hasPermission(userId: string, permissionName: string): Promise<boolean> {
   if (await isAdmin(userId)) return true;
 
   const roles = await getUserRoles(userId);
@@ -165,12 +157,7 @@ export async function hasPermission(
   const permissionCheck = await db
     .select()
     .from(permissionsTable)
-    .where(
-      and(
-        inArray(permissionsTable.roleId, roleIds),
-        eq(permissionsTable.name, permissionName)
-      )
-    )
+    .where(and(inArray(permissionsTable.roleId, roleIds), eq(permissionsTable.name, permissionName)))
     .limit(1);
 
   return permissionCheck.length > 0;

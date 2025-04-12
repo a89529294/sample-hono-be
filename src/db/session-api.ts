@@ -1,23 +1,15 @@
-import {
-  type UserFromDb,
-  type SessionFromDb,
-  sessionsTable,
-  usersTable,
-} from "./schema.js";
-import crypto from "node:crypto";
-import { sha256 } from "@oslojs/crypto/sha2";
-import { encodeHexLowerCase } from "@oslojs/encoding";
-import { db } from "./index.js";
-import { eq } from "drizzle-orm";
+import { type UserFromDb, type SessionFromDb, sessionsTable, usersTable } from './schema.js';
+import crypto from 'node:crypto';
+import { sha256 } from '@oslojs/crypto/sha2';
+import { encodeHexLowerCase } from '@oslojs/encoding';
+import { db } from './index.js';
+import { eq } from 'drizzle-orm';
 
 export function generateSessionToken(): string {
   return crypto.randomUUID();
 }
 
-export async function createSession(
-  token: string,
-  userId: string
-): Promise<SessionFromDb> {
+export async function createSession(token: string, userId: string): Promise<SessionFromDb> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
   const session: SessionFromDb = {
     id: sessionId,
@@ -28,9 +20,7 @@ export async function createSession(
   return session;
 }
 
-export async function validateSessionToken(
-  token: string
-): Promise<SessionValidationResult> {
+export async function validateSessionToken(token: string): Promise<SessionValidationResult> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
 
   const result = await db
@@ -76,8 +66,6 @@ export async function getCurrentSession(sessionToken: string) {
   return result;
 }
 
-export type SessionValidationResult =
-  | { session: SessionFromDb; user: UserFromDb }
-  | { session: null; user: null };
+export type SessionValidationResult = { session: SessionFromDb; user: UserFromDb } | { session: null; user: null };
 
 // https://lucia-auth.com/sessions/basic-api/drizzle-orm

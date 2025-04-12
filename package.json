@@ -1,7 +1,16 @@
 {
   "name": "sample-hono-be",
   "type": "module",
+  "main": "./trpc-api-export/dist/index.js",
+  "exports": "./trpc-api-export/dist/index.js",
+  "types": "./trpc-api-export/dist/index.d.ts",
+  "files": [
+    "trpc-api-export/dist",
+    "README.md"
+  ],
+  "sideEffects": false,
   "scripts": {
+    "trpc-api-export": "tsup --config trpc-api-export/builder/tsup.config.ts && npm run format-fix",
     "db:push:dev": "NODE_ENV=dev pnpm drizzle-kit push",
     "db:push:prod": "NODE_ENV=prod pnpm drizzle-kit push",
     "db:seed:dev": "NODE_ENV=dev pnpm tsx src/db/seed.ts",
@@ -9,23 +18,30 @@
     "dev": "NODE_ENV=dev tsx watch src/index.ts",
     "build": "tsc",
     "start": "NODE_ENV=prod node dist/src/index.js",
-    "prod": "pnpm run build && pnpm run start"
+    "prod": "pnpm run build && pnpm run start",
+    "format-fix": "prettier --config .prettierrc --write --ignore-unknown -l ."
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.777.0",
     "@hono/node-server": "^1.14.0",
+    "@hono/trpc-server": "^0.3.4",
     "@node-rs/argon2": "^2.0.2",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
+    "@trpc/server": "^11.0.4",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.41.0",
     "hono": "^4.7.5",
-    "pg": "^8.14.1"
+    "pg": "^8.14.1",
+    "sample-hono-be-api-types": "^1.0.2",
+    "tsup": "^8.4.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
     "@types/pg": "^8.11.11",
     "drizzle-kit": "^0.30.6",
+    "prettier": "^3.5.3",
     "tsx": "^4.7.1",
     "typescript": "^5.8.2"
   },

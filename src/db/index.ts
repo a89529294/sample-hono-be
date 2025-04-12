@@ -1,6 +1,6 @@
-import * as dotenv from "dotenv";
-import { drizzle } from "drizzle-orm/node-postgres";
-import pg from "pg";
+import * as dotenv from 'dotenv';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import pg from 'pg';
 const { Pool } = pg;
 
 const envPath = `.env.${process.env.NODE_ENV}`;

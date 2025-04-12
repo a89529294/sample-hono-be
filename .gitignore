@@ -29,3 +29,6 @@ lerna-debug.log*
 
 secrets.txt
 dist
+coverage
+build
+compiled
