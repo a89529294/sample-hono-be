@@ -34,6 +34,12 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<
         };
       };
     }>;
+    logout: _trpc_server.TRPCMutationProcedure<{
+      input: void;
+      output: {
+        success: string;
+      };
+    }>;
     me: _trpc_server.TRPCMutationProcedure<{
       input: void;
       output: {
