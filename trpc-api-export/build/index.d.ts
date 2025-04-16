@@ -39,7 +39,6 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<
               roles: {
                 id: string;
                 name: string;
-                chinese_name: string | null;
               }[];
             };
           };
@@ -60,8 +59,49 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<
             roles: {
               id: string;
               name: string;
-              chinese_name: string | null;
             }[];
+          };
+        }>;
+      }>
+    >;
+    personnelPermission: _trpc_server_unstable_core_do_not_import.BuiltRouter<
+      {
+        ctx: {
+          c: hono.Context;
+        };
+        meta: object;
+        errorShape: _trpc_server_unstable_core_do_not_import.DefaultErrorShape;
+        transformer: false;
+      },
+      _trpc_server_unstable_core_do_not_import.DecorateCreateRouterOptions<{
+        createUserForEmployee: _trpc_server.TRPCMutationProcedure<{
+          input: {
+            employeeId: string;
+          };
+          output: {
+            name: string;
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            account: string;
+            employeeId: string | null;
+            passwordHash: string;
+          };
+        }>;
+        createUserWithRoles: _trpc_server.TRPCMutationProcedure<{
+          input: {
+            name: string;
+            account: string;
+            roleIds: string[];
+          };
+          output: {
+            name: string;
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            account: string;
+            employeeId: string | null;
+            passwordHash: string;
           };
         }>;
       }>
