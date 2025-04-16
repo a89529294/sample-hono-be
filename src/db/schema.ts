@@ -4,6 +4,7 @@ import { pgEnum, pgTable, primaryKey, timestamp, uuid, varchar } from 'drizzle-o
 
 // Enums
 export const projectStatusEnum = pgEnum('project_status', ['pending', 'in_progress', 'completed', 'cancelled']);
+export const genderEnum = pgEnum('gender', ['male', 'female']);
 
 const timestamps = {
   created_at: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
@@ -40,20 +41,42 @@ export const departmentsTable = pgTable('departments', {
   ...timestamps,
 });
 
-export const usersTable = pgTable('users', {
+export const employeesTable = pgTable('employees', {
   id: uuid('id').primaryKey().defaultRandom(),
-  account: varchar({ length: 255 }).notNull().unique(),
-  name: varchar({ length: 255 }).notNull(),
-  // users with no password cannot login to erp
-  passwordHash: varchar({ length: 255 }),
+  idNumber: varchar({ length: 20 }).notNull().unique(),
+  chName: varchar({ length: 100 }).notNull(),
+  enName: varchar({ length: 100 }),
+  birthday: timestamp('birthday', { withTimezone: true, mode: 'date' }),
+  gender: genderEnum().notNull(),
+  marital_status: varchar({ length: 20 }),
+  education: varchar({ length: 50 }),
+  phone1: varchar({ length: 30 }).notNull(),
+  email: varchar({ length: 100 }),
+  residenceCounty: varchar({ length: 100 }),
+  residenceDistrict: varchar({ length: 100 }),
+  residenceAddress: varchar({ length: 255 }),
+  mailingCounty: varchar({ length: 100 }),
+  mailingDistrict: varchar({ length: 100 }),
+  mailingAddress: varchar({ length: 255 }),
   ...timestamps,
 });
 
-export const userDepartmentsTable = pgTable('user_departments', {
+export const usersTable = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
+  account: varchar({ length: 255 }).notNull().unique(), // idNumber from employeesTable
+  name: varchar({ length: 255 }).notNull(), // chName from employeesTable
+  employeeId: uuid('employee_id')
+    .unique()
+    .references(() => employeesTable.id),
+  passwordHash: varchar({ length: 255 }).notNull(),
+  ...timestamps,
+});
+
+export const employeeDepartmentsTable = pgTable('employee_departments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  employeeId: uuid('user_id')
     .notNull()
-    .references(() => usersTable.id),
+    .references(() => employeesTable.id),
   departmentId: uuid('department_id')
     .notNull()
     .references(() => departmentsTable.id),
@@ -68,6 +91,17 @@ export const roleDepartmentsTable = pgTable('role_departments', {
   departmentId: uuid('department_id')
     .notNull()
     .references(() => departmentsTable.id),
+  ...timestamps,
+});
+
+export const userRolesTable = pgTable('user_roles', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => usersTable.id),
+  roleId: uuid('role_id')
+    .notNull()
+    .references(() => rolesTable.id),
   ...timestamps,
 });
 
@@ -105,7 +139,7 @@ export const customersTable = pgTable('customers', {
 export const projectsTable = pgTable('projects', {
   id: uuid('id').primaryKey().defaultRandom(),
   projectNumber: varchar({ length: 50 }).notNull(),
-  status: projectStatusEnum('status').notNull().default('pending'),
+  status: projectStatusEnum().notNull().default('pending'),
   name: varchar({ length: 255 }).notNull(),
   county: varchar({ length: 100 }).notNull(),
   district: varchar({ length: 100 }).notNull(),
@@ -176,6 +210,7 @@ export const projectContactsRelations = relations(projectContactsTable, ({ one }
 export const rolesRelations = relations(rolesTable, ({ many }) => ({
   permissions: many(permissionsTable),
   roleDepartments: many(roleDepartmentsTable),
+  userRoles: many(userRolesTable),
 }));
 
 export const permissionsRelations = relations(permissionsTable, ({ one }) => ({
@@ -186,22 +221,22 @@ export const permissionsRelations = relations(permissionsTable, ({ one }) => ({
 }));
 
 export const departmentsRelations = relations(departmentsTable, ({ many }) => ({
-  userDepartments: many(userDepartmentsTable),
+  userDepartments: many(employeeDepartmentsTable),
   roleDepartments: many(roleDepartmentsTable),
 }));
 
 export const usersRelations = relations(usersTable, ({ many }) => ({
-  userDepartments: many(userDepartmentsTable),
   sessions: many(sessionsTable),
+  userRoles: many(userRolesTable),
 }));
 
-export const userDepartmentsRelations = relations(userDepartmentsTable, ({ one }) => ({
-  user: one(usersTable, {
-    fields: [userDepartmentsTable.userId],
-    references: [usersTable.id],
+export const employeeDepartmentsRelations = relations(employeeDepartmentsTable, ({ one }) => ({
+  employee: one(employeesTable, {
+    fields: [employeeDepartmentsTable.employeeId],
+    references: [employeesTable.id],
   }),
   department: one(departmentsTable, {
-    fields: [userDepartmentsTable.departmentId],
+    fields: [employeeDepartmentsTable.departmentId],
     references: [departmentsTable.id],
   }),
 }));
@@ -214,6 +249,17 @@ export const roleDepartmentsRelations = relations(roleDepartmentsTable, ({ one }
   department: one(departmentsTable, {
     fields: [roleDepartmentsTable.departmentId],
     references: [departmentsTable.id],
+  }),
+}));
+
+export const userRolesRelations = relations(userRolesTable, ({ one }) => ({
+  role: one(rolesTable, {
+    fields: [userRolesTable.roleId],
+    references: [rolesTable.id],
+  }),
+  user: one(usersTable, {
+    fields: [userRolesTable.userId],
+    references: [usersTable.id],
   }),
 }));
 
@@ -234,5 +280,7 @@ export type ProjectFromDb = InferSelectModel<typeof projectsTable>;
 export type ContactFromDb = InferSelectModel<typeof contactsTable>;
 export type ProjectContactFromDb = InferSelectModel<typeof projectContactsTable>;
 export type DepartmentFromDb = InferSelectModel<typeof departmentsTable>;
-export type UserDepartmentFromDb = InferSelectModel<typeof userDepartmentsTable>;
+export type EmployeeDepartmentFromDb = InferSelectModel<typeof employeeDepartmentsTable>;
 export type RoleDepartmentFromDb = InferSelectModel<typeof roleDepartmentsTable>;
+export type UserRoleFromDb = InferSelectModel<typeof userRolesTable>;
+export type EmployeeFromDb = InferSelectModel<typeof employeesTable>;

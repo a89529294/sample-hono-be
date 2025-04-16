@@ -3,10 +3,13 @@ import type { MiddlewareHandler } from 'hono';
 import { db } from '../db/index.js';
 import {
   departmentsTable,
+  employeesTable,
+  employeeDepartmentsTable,
   permissionsTable,
   roleDepartmentsTable,
   rolesTable,
-  userDepartmentsTable,
+  userRolesTable,
+  usersTable,
   type SessionFromDb,
   type UserFromDb,
 } from '../db/schema.js';
@@ -30,65 +33,65 @@ declare module 'hono' {
  * @returns An array of role objects with id and name
  */
 export async function getUserRoles(userId: string) {
-  // Get all departments the user belongs to
-  const userDepts = await db
-    .select({ departmentId: userDepartmentsTable.departmentId })
-    .from(userDepartmentsTable)
-    .where(eq(userDepartmentsTable.userId, userId));
+  // Get the user first to check for employeeId
+  const user = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
 
-  if (userDepts.length === 0) {
-    return [];
+  if (user.length === 0) throw new Error(`User with id ${userId} does not exist`);
+
+  const userObj = user[0];
+
+  // Case 1: No employeeId, get roles from userRolesTable using join
+  if (!userObj.employeeId) {
+    const userRoles = await db
+      .select({ id: rolesTable.id, name: rolesTable.name })
+      .from(userRolesTable)
+      .innerJoin(rolesTable, eq(userRolesTable.roleId, rolesTable.id))
+      .where(eq(userRolesTable.userId, userId));
+    return userRoles;
   }
 
-  // Get all department IDs the user belongs to
-  const userDeptIds = userDepts.map((dept) => dept.departmentId);
+  // Case 2: Has employeeId, get employee, then departments, then roles
+  const employeeId = userObj.employeeId;
+  const employee = await db.select().from(employeesTable).where(eq(employeesTable.id, employeeId)).limit(1);
 
-  // Get all roles associated with these departments
-  const departmentRoles = await db
-    .select({ roleId: roleDepartmentsTable.roleId })
-    .from(roleDepartmentsTable)
-    .where(inArray(roleDepartmentsTable.departmentId, userDeptIds));
+  if (employee.length === 0) throw new Error(`Employee with id ${employeeId} does not exist`);
 
-  if (departmentRoles.length === 0) {
-    return [];
-  }
+  // Get departments for the employee
+  const employeeDepartments = await db
+    .select({ departmentId: employeeDepartmentsTable.departmentId })
+    .from(employeeDepartmentsTable)
+    .where(eq(employeeDepartmentsTable.employeeId, employeeId));
 
-  // Get all role IDs from the user's departments
-  const roleIds = departmentRoles.map((role) => role.roleId);
+  if (employeeDepartments.length === 0) return [];
 
-  // Get role details
+  const deptIds = employeeDepartments.map((d) => d.departmentId);
+
+  // Get roles for these departments via roleDepartmentsTable
   const roles = await db
-    .select({
-      id: rolesTable.id,
-      name: rolesTable.name,
-      chinese_name: rolesTable.chinese_name,
-    })
-    .from(rolesTable)
-    .where(inArray(rolesTable.id, roleIds));
+    .select({ id: rolesTable.id, name: rolesTable.name })
+    .from(roleDepartmentsTable)
+    .innerJoin(rolesTable, eq(roleDepartmentsTable.roleId, rolesTable.id))
+    .where(inArray(roleDepartmentsTable.departmentId, deptIds));
 
   return roles;
 }
 
 export async function isAdmin(userId: string) {
-  // check for existense of admin dept
-  const adminDept = await db
+  // Check for existence of 'AdminManagement' role
+  const adminRole = await db.select().from(rolesTable).where(eq(rolesTable.name, 'AdminManagement')).limit(1);
+
+  if (adminRole.length === 0) return false;
+
+  const adminRoleId = adminRole[0].id;
+
+  // Check if user has the 'AdminManagement' role
+  const userHasAdminRole = await db
     .select()
-    .from(departmentsTable)
-    .where(eq(departmentsTable.name, 'Administration'))
+    .from(userRolesTable)
+    .where(and(eq(userRolesTable.userId, userId), eq(userRolesTable.roleId, adminRoleId)))
     .limit(1);
 
-  if (adminDept.length === 0) return false;
-
-  const adminDeptId = adminDept[0].id;
-
-  // Check if user belongs to the admin department
-  const userInAdminDept = await db
-    .select()
-    .from(userDepartmentsTable)
-    .where(and(eq(userDepartmentsTable.userId, userId), eq(userDepartmentsTable.departmentId, adminDeptId)))
-    .limit(1);
-
-  return userInAdminDept.length === 1;
+  return userHasAdminRole.length === 1;
 }
 
 /**
@@ -96,48 +99,48 @@ export async function isAdmin(userId: string) {
  * Extracts the session token from the request header,
  * validates it, and attaches the user and the session to the context
  */
-export const authenticate: MiddlewareHandler = async (c, next) => {
-  // Skip authentication for public routes
-  if (c.req.path === '/' || c.req.path === '/trpc/login') {
-    return next();
-  }
+// export const authenticate: MiddlewareHandler = async (c, next) => {
+//   // Skip authentication for public routes
+//   if (c.req.path === '/' || c.req.path === '/trpc/login') {
+//     return next();
+//   }
 
-  const headerRecord = c.req.header();
-  const authHeader = headerRecord.authorization;
-  const sessionToken = authHeader?.split(' ')[1];
+//   const headerRecord = c.req.header();
+//   const authHeader = headerRecord.authorization;
+//   const sessionToken = authHeader?.split(' ')[1];
 
-  if (!sessionToken) {
-    return c.json(
-      {
-        error: 'Authentication required',
-        message: 'Missing Authorization: Bearer <session_token>',
-      },
-      401,
-    );
-  }
+//   if (!sessionToken) {
+//     return c.json(
+//       {
+//         error: 'Authentication required',
+//         message: 'Missing Authorization: Bearer <session_token>',
+//       },
+//       401,
+//     );
+//   }
 
-  const { session, user } = await getCurrentSession(sessionToken);
+//   const { session, user } = await getCurrentSession(sessionToken);
 
-  if (!session || !user) {
-    return c.json(
-      {
-        error: 'Authentication failed',
-        message: 'Invalid or expired session',
-      },
-      401,
-    );
-  }
+//   if (!session || !user) {
+//     return c.json(
+//       {
+//         error: 'Authentication failed',
+//         message: 'Invalid or expired session',
+//       },
+//       401,
+//     );
+//   }
 
-  const isUserAdmin = await isAdmin(user.id);
+//   const isUserAdmin = await isAdmin(user.id);
 
-  c.set('user', {
-    ...user,
-    isAdmin: isUserAdmin,
-  });
-  c.set('session', session as Session);
+//   c.set('user', {
+//     ...user,
+//     isAdmin: isUserAdmin,
+//   });
+//   c.set('session', session as Session);
 
-  await next();
-};
+//   await next();
+// };
 
 /**
  * Checks if a user has a specific permission
@@ -161,4 +164,13 @@ export async function hasPermission(userId: string, permissionName: string): Pro
     .limit(1);
 
   return permissionCheck.length > 0;
+}
+
+export function generatePassword(length = 20) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
 }

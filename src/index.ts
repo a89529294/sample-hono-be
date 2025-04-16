@@ -6,7 +6,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getUserFromAccount } from './db/user.js';
 import { verifyPasswordHash } from './db/password.js';
 import { createSession, generateSessionToken, invalidateAllSessions, invalidateSession } from './db/session-api.js';
-import { authenticate } from './helpers/auth.js';
+// import { authenticate } from './helpers/auth.js';
 import { getUserRoles } from './helpers/auth.js';
 
 import production from './production.js';
@@ -14,7 +14,7 @@ import personnelPermission from './personnel-permission.js';
 import basicInfo from './basic-info.js';
 import storage from './storage.js';
 import { trpcServer } from '@hono/trpc-server';
-import { appRouter } from './trpc.js';
+import { appRouter } from 'trpc/router.js';
 
 const envPath = `.env.${process.env.NODE_ENV}`;
 dotenv.config({ path: envPath });
@@ -23,7 +23,7 @@ const app = new Hono();
 app.use('*', cors());
 
 // Apply authentication middleware to all routes
-app.use('*', authenticate);
+// app.use('*', authenticate);
 
 app.get('/', (c) => {
   return c.json({ success: true });
@@ -65,16 +65,16 @@ app.get('/', (c) => {
 //   });
 // });
 
-app.get('/logout', async (c) => {
-  // User and session are already attached to context by the middleware
-  const session = c.get('session');
+// app.get('/logout', async (c) => {
+//   // User and session are already attached to context by the middleware
+//   const session = c.get('session');
 
-  await invalidateSession(session.id);
+//   await invalidateSession(session.id);
 
-  return c.json({
-    success: true,
-  });
-});
+//   return c.json({
+//     success: true,
+//   });
+// });
 
 // app.get('/me', async (c) => {
 //   // User is already attached to context by the middleware

@@ -9,8 +9,6 @@ app.get('/', async (c) => {
   // Get user from context (set by authentication middleware)
   const user = c.get('user');
 
-  console.log(user);
-
   // Check if user has permission to read production data
   const hasReadPermission = await hasPermission(user.id, 'production:read');
 
