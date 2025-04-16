@@ -5,7 +5,7 @@ import { db } from '../../db/index.js';
 import { usersTable, userRolesTable, employeesTable, rolesTable } from '../../db/schema.js';
 import { hashPassword } from '../../db/password.js';
 import { eq, inArray } from 'drizzle-orm';
-import { generatePassword } from 'helpers/auth.js';
+import { generatePassword } from '../../helpers/auth.js';
 
 export const createUserForEmployeeProcedure = protectedProcedure
   .input(

@@ -14,7 +14,7 @@ import personnelPermission from './personnel-permission.js';
 import basicInfo from './basic-info.js';
 import storage from './storage.js';
 import { trpcServer } from '@hono/trpc-server';
-import { appRouter } from 'trpc/router.js';
+import { appRouter } from './trpc/router.js';
 
 const envPath = `.env.${process.env.NODE_ENV}`;
 dotenv.config({ path: envPath });
