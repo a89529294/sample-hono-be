@@ -62,7 +62,7 @@ export const logoutProcedure = protectedProcedure.mutation(async ({ ctx }) => {
 });
 
 export const meProcedure = protectedProcedure.mutation(async ({ ctx }) => {
-  const user = ctx.c.get('user');
+  const user = ctx.user;
   const roles = await getUserRoles(user.id);
   const isAdminUser = await isAdmin(user.id);
 

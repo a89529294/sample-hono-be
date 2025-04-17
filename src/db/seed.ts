@@ -15,6 +15,8 @@ import {
   roleDepartmentsTable,
   employeesTable,
   employeeDepartmentsTable,
+  appUsersTable,
+  appUserPermissions,
 } from 'db/schema';
 import { db } from 'db/index';
 import { randomUUID } from 'crypto';
@@ -323,6 +325,21 @@ async function main() {
     employeeId: hrEmployeeId,
     passwordHash: '$argon2id$v=19$m=19456,t=2,p=1$EGTc0PR3V8ihyus3qz/WJA$sbAvDU2mZOJw7XkmKzeBQl79a6JiJUaGTthKJuh+mP0',
   });
+
+  // Create app user for HR employee
+  const hrAppUserId = randomUUID();
+  await db.insert(appUsersTable).values({
+    id: hrAppUserId,
+    account: 'hr001', // same as employee idNumber
+    password: '$argon2id$v=19$m=19456,t=2,p=1$uYynoESvp104MjN0NXYc1g$dCuvbbaE9GoeJKmJaSGI8wCmBhBsmt97/2QNpg7zzKM',
+    employeeId: hrEmployeeId,
+  });
+  await db.insert(appUserPermissions).values([
+    { id: randomUUID(), appUserId: hrAppUserId, permission: 'man-production' },
+    { id: randomUUID(), appUserId: hrAppUserId, permission: 'ctr-gdstd' },
+    { id: randomUUID(), appUserId: hrAppUserId, permission: 'monitor-weight' },
+  ]);
+  console.log('App user for HR created!');
 
   // Finance user
   const financeEmployeeId = randomUUID();

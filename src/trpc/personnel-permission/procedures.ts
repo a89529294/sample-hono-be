@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { protectedProcedure } from '../core.js';
+import { protectedProcedure } from 'trpc/core';
 import { TRPCError } from '@trpc/server';
 import { db } from 'db/index';
 import { usersTable, userRolesTable, employeesTable, rolesTable } from 'db/schema';

@@ -32,13 +32,22 @@ export const authMiddleware = t.middleware(async ({ ctx, next }) => {
 
   const isUserAdmin = await isAdmin(user.id);
 
-  c.set('user', {
-    ...user,
-    isAdmin: isUserAdmin,
-  });
-  c.set('session', session);
+  // c.set('user', {
+  //   ...user,
+  //   isAdmin: isUserAdmin,
+  // });
+  // c.set('session', session);
 
-  return next({ ctx });
+  return next({
+    ctx: {
+      ...ctx,
+      user: {
+        ...user,
+        isAdmin: isUserAdmin,
+      },
+      session,
+    },
+  });
 });
 
 export const publicProcedure = t.procedure.use(delayMiddleware);

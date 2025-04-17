@@ -1,10 +1,15 @@
 import { relations } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
-import { pgEnum, pgTable, primaryKey, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, primaryKey, timestamp, uuid, varchar, boolean } from 'drizzle-orm/pg-core';
 
 // Enums
 export const projectStatusEnum = pgEnum('project_status', ['pending', 'in_progress', 'completed', 'cancelled']);
 export const genderEnum = pgEnum('gender', ['male', 'female']);
+export const appPermissionEnum = pgEnum('app_permission', [
+  'man-production', // production management
+  'ctr-gdstd', // GD-STD operations
+  'monitor-weight', // real-time monitoring
+]);
 
 const timestamps = {
   created_at: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
@@ -63,12 +68,12 @@ export const employeesTable = pgTable('employees', {
 
 export const usersTable = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
-  account: varchar({ length: 255 }).notNull().unique(), // idNumber from employeesTable
+  account: varchar({ length: 255 }).notNull().unique(), // idNumber from employeesTable if user is linked to an employee
   name: varchar({ length: 255 }).notNull(), // chName from employeesTable
   employeeId: uuid('employee_id')
     .unique()
     .references(() => employeesTable.id),
-  passwordHash: varchar({ length: 255 }).notNull(),
+  passwordHash: varchar('password_hash', { length: 255 }).notNull(),
   ...timestamps,
 });
 
@@ -81,6 +86,25 @@ export const employeeDepartmentsTable = pgTable('employee_departments', {
     .notNull()
     .references(() => departmentsTable.id),
   ...timestamps,
+});
+
+export const appUsersTable = pgTable('app_users', {
+  id: uuid().primaryKey().defaultRandom(),
+  account: varchar({ length: 255 }).notNull().unique(), // idNumber from employeesTable
+  passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+  employeeId: uuid('employee_id')
+    .notNull()
+    .unique()
+    .references(() => employeesTable.id),
+  ...timestamps,
+});
+
+export const appUserPermissions = pgTable('appuser_permissions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  appUserId: uuid('app_user_id')
+    .notNull()
+    .references(() => appUsersTable.id),
+  permission: appPermissionEnum('permission').notNull(),
 });
 
 export const roleDepartmentsTable = pgTable('role_departments', {
@@ -225,9 +249,20 @@ export const departmentsRelations = relations(departmentsTable, ({ many }) => ({
   roleDepartments: many(roleDepartmentsTable),
 }));
 
-export const usersRelations = relations(usersTable, ({ many }) => ({
+export const usersRelations = relations(usersTable, ({ many, one }) => ({
   sessions: many(sessionsTable),
   userRoles: many(userRolesTable),
+  employee: one(employeesTable, {
+    fields: [usersTable.employeeId],
+    references: [employeesTable.id],
+  }),
+}));
+
+export const appUsersRelations = relations(appUsersTable, ({ one }) => ({
+  employee: one(employeesTable, {
+    fields: [appUsersTable.employeeId],
+    references: [employeesTable.id],
+  }),
 }));
 
 export const employeeDepartmentsRelations = relations(employeeDepartmentsTable, ({ one }) => ({
@@ -270,6 +305,23 @@ export const sessionsRelations = relations(sessionsTable, ({ one }) => ({
   }),
 }));
 
+// --- App User Refresh Tokens ---
+export const appUserRefreshTokensTable = pgTable('app_user_refresh_tokens', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  appUserId: uuid('app_user_id')
+    .notNull()
+    .references(() => appUsersTable.id),
+  expires_at: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+  ...timestamps,
+});
+
+export const appUserRefreshTokensRelations = relations(appUserRefreshTokensTable, ({ one }) => ({
+  appUser: one(appUsersTable, {
+    fields: [appUserRefreshTokensTable.appUserId],
+    references: [appUsersTable.id],
+  }),
+}));
+
 // Type definitions for database models
 export type RoleFromDb = InferSelectModel<typeof rolesTable>;
 export type PermissionFromDb = InferSelectModel<typeof permissionsTable>;
@@ -284,3 +336,4 @@ export type EmployeeDepartmentFromDb = InferSelectModel<typeof employeeDepartmen
 export type RoleDepartmentFromDb = InferSelectModel<typeof roleDepartmentsTable>;
 export type UserRoleFromDb = InferSelectModel<typeof userRolesTable>;
 export type EmployeeFromDb = InferSelectModel<typeof employeesTable>;
+export type AppUserRefreshTokenFromDb = InferSelectModel<typeof appUserRefreshTokensTable>;

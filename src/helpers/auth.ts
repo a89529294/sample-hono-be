@@ -20,12 +20,12 @@ type User = Omit<UserFromDb, 'passwordHash' | 'created_at' | 'updated_at'> & {
 };
 type Session = SessionFromDb;
 
-declare module 'hono' {
-  interface ContextVariableMap {
-    user: User;
-    session: Session;
-  }
-}
+// declare module 'hono' {
+//   interface ContextVariableMap {
+//     user: User;
+//     session: Session;
+//   }
+// }
 
 /**
  * Get user roles based on user ID

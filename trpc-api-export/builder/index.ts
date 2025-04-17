@@ -1,1 +1,1 @@
-export type { TrpcTypes } from 'trpc/router.js';
+export type { TrpcTypes } from 'trpc/router';
