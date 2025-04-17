@@ -1,8 +1,8 @@
-import { type UserFromDb, type SessionFromDb, sessionsTable, usersTable } from './schema.js';
+import { type UserFromDb, type SessionFromDb, sessionsTable, usersTable } from 'db/schema';
 import crypto from 'node:crypto';
 import { sha256 } from '@oslojs/crypto/sha2';
 import { encodeHexLowerCase } from '@oslojs/encoding';
-import { db } from './index.js';
+import { db } from 'db/index';
 import { eq } from 'drizzle-orm';
 
 export function generateSessionToken(): string {

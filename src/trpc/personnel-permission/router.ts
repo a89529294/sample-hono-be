@@ -1,8 +1,5 @@
-import { t } from '../core.js';
-import {
-  createUserForEmployeeProcedure,
-  createUserWithRolesProcedure,
-} from './procedures.js';
+import { t } from 'trpc/core';
+import { createUserForEmployeeProcedure, createUserWithRolesProcedure } from 'trpc/personnel-permission/procedures';
 
 export const personnelPermissionRouter = t.router({
   createUserForEmployee: createUserForEmployeeProcedure,

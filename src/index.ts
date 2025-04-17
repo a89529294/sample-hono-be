@@ -3,18 +3,18 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getUserFromAccount } from './db/user.js';
-import { verifyPasswordHash } from './db/password.js';
-import { createSession, generateSessionToken, invalidateAllSessions, invalidateSession } from './db/session-api.js';
-// import { authenticate } from './helpers/auth.js';
-import { getUserRoles } from './helpers/auth.js';
+import { getUserFromAccount } from 'db/user.js';
+import { verifyPasswordHash } from 'db/password.js';
+import { createSession, generateSessionToken, invalidateAllSessions, invalidateSession } from 'db/session-api.js';
+// import { authenticate } from 'helpers/auth.js';
+import { getUserRoles } from 'helpers/auth.js';
 
-import production from './production.js';
-import personnelPermission from './personnel-permission.js';
-import basicInfo from './basic-info.js';
-import storage from './storage.js';
+import production from 'production.js';
+import personnelPermission from 'personnel-permission.js';
+import basicInfo from 'basic-info.js';
+import storage from 'storage.js';
 import { trpcServer } from '@hono/trpc-server';
-import { appRouter } from './trpc/router.js';
+import { appRouter } from 'trpc/router';
 
 const envPath = `.env.${process.env.NODE_ENV}`;
 dotenv.config({ path: envPath });

@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { db } from './index.js';
+import { db } from 'db/index';
 
 async function reset() {
   console.log('⏳ Resetting database...');

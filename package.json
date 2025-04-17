@@ -18,8 +18,8 @@
     "db:seed:dev": "NODE_ENV=dev pnpm tsx src/db/seed.ts",
     "db:seed:prod": "NODE_ENV=prod pnpm tsx src/db/seed.ts",
     "dev": "NODE_ENV=dev tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "NODE_ENV=prod node dist/src/index.js",
+    "build": "tsup src/index.ts --format esm --dts --outDir dist",
+    "start": "NODE_ENV=prod node dist/index.js",
     "prod": "pnpm run build && pnpm run start",
     "format-fix": "prettier --config .prettierrc --write --ignore-unknown -l ."
   },
@@ -35,8 +35,6 @@
     "drizzle-orm": "^0.41.0",
     "hono": "^4.7.5",
     "pg": "^8.14.1",
-    "sample-hono-be-api-types": "^1.0.2",
-    "tsup": "^8.4.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -45,7 +43,8 @@
     "drizzle-kit": "^0.30.6",
     "prettier": "^3.5.3",
     "tsx": "^4.7.1",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "tsup": "^8.4.0"
   },
   "packageManager": "pnpm@10.7.0+sha512.6b865ad4b62a1d9842b61d674a393903b871d9244954f652b8842c2b553c72176b278f64c463e52d40fff8aba385c235c8c9ecf5cc7de4fd78b8bb6d49633ab6"
 }

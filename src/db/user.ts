@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
-import { db } from './index.js';
-import { type UserFromDb, usersTable } from './schema.js';
+import { db } from 'db/index';
+import { type UserFromDb, usersTable } from 'db/schema';
 
 export async function getUserFromAccount(account: string): Promise<UserFromDb | null> {
   try {

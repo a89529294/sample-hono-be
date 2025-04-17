@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { protectedProcedure } from '../core.js';
 import { TRPCError } from '@trpc/server';
-import { db } from '../../db/index.js';
-import { usersTable, userRolesTable, employeesTable, rolesTable } from '../../db/schema.js';
-import { hashPassword } from '../../db/password.js';
+import { db } from 'db/index';
+import { usersTable, userRolesTable, employeesTable, rolesTable } from 'db/schema';
+import { hashPassword } from 'db/password';
 import { eq, inArray } from 'drizzle-orm';
-import { generatePassword } from '../../helpers/auth.js';
+import { generatePassword } from 'helpers/auth';
 
 export const createUserForEmployeeProcedure = protectedProcedure
   .input(
@@ -54,9 +54,7 @@ export const createUserWithRolesProcedure = protectedProcedure
     const passwordHash = await hashPassword(password);
 
     // Validate all roleIds exist
-    const roles = await db.select({ id: rolesTable.id }).from(rolesTable).where(
-      inArray(rolesTable.id, input.roleIds)
-    );
+    const roles = await db.select({ id: rolesTable.id }).from(rolesTable).where(inArray(rolesTable.id, input.roleIds));
     if (roles.length !== input.roleIds.length) {
       throw new TRPCError({ code: 'BAD_REQUEST', message: 'One or more roleIds do not exist' });
     }

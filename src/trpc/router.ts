@@ -1,6 +1,6 @@
-import { t } from './core.js';
-import { authRouter } from './auth/router.js';
-import { personnelPermissionRouter } from './personnel-permission/router.js';
+import { t } from 'trpc/core';
+import { authRouter } from 'trpc/auth/router';
+import { personnelPermissionRouter } from 'trpc/personnel-permission/router';
 
 export const appRouter = t.router({
   auth: authRouter,

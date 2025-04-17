@@ -15,8 +15,8 @@ import {
   roleDepartmentsTable,
   employeesTable,
   employeeDepartmentsTable,
-} from './schema.js';
-import { db } from './index.js';
+} from 'db/schema';
+import { db } from 'db/index';
 import { randomUUID } from 'crypto';
 
 // const envPath = `.env.${process.env.NODE_ENV}`;

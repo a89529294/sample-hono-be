@@ -1,6 +1,6 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import type { MiddlewareHandler } from 'hono';
-import { db } from '../db/index.js';
+import { db } from 'db/index';
 import {
   departmentsTable,
   employeesTable,
@@ -12,8 +12,8 @@ import {
   usersTable,
   type SessionFromDb,
   type UserFromDb,
-} from '../db/schema.js';
-import { getCurrentSession } from '../db/session-api.js';
+} from 'db/schema';
+import { getCurrentSession } from 'db/session-api';
 
 type User = Omit<UserFromDb, 'passwordHash' | 'created_at' | 'updated_at'> & {
   isAdmin: boolean;

@@ -1,8 +1,8 @@
 import { initTRPC } from '@trpc/server';
 import { TRPCError } from '@trpc/server';
 import type { Context } from 'hono';
-import { getCurrentSession } from '../db/session-api.js';
-import { isAdmin } from '../helpers/auth.js';
+import { getCurrentSession } from 'db/session-api';
+import { isAdmin } from 'helpers/auth';
 
 const ARTIFICIAL_DELAY_MS = process.env.NODE_ENV === 'dev' ? 1000 : 0;
 

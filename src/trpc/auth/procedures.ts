@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { publicProcedure, protectedProcedure } from '../core.js';
+import { publicProcedure, protectedProcedure } from 'trpc/core';
 import { TRPCError } from '@trpc/server';
-import { getUserFromAccount } from '../../db/user.js';
-import { verifyPasswordHash } from '../../db/password.js';
-import { createSession, generateSessionToken, invalidateAllSessions, invalidateSession } from '../../db/session-api.js';
-import { getUserRoles, isAdmin } from '../../helpers/auth.js';
+import { getUserFromAccount } from 'db/user';
+import { verifyPasswordHash } from 'db/password';
+import { createSession, generateSessionToken, invalidateAllSessions, invalidateSession } from 'db/session-api';
+import { getUserRoles, isAdmin } from 'helpers/auth';
 
 export const loginProcedure = publicProcedure
   .input(
