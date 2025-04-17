@@ -92,6 +92,7 @@ server {
     - back on ec2 instance, `sudo certbot renew --dry-run`
 
 17. connect to aws rds
+
     - `ssh -i xxx.pem -L 5433:rds-endpoint:5432 ubuntu@ip`, keep connection on
     - in pgadmin, query tool workspace fill in
       - hostname: localhost
@@ -101,3 +102,18 @@ server {
       - password: your_secret_password
     - once in you can create a new db, `CREATE DATABSE dbname`
     - disconnect and then reconnect under the new db
+
+18. Add tsup for bundling (required if you want absolute imports)
+    - in package.json script: `"build": "tsup src/index.ts --format esm --dts --outDir dist",`
+    - in `tsconfig.json` add
+
+```json
+    "baseUrl": "src", // enables direct import from src
+    "paths": {
+      "trpc/*": ["trpc/*"],
+      "db/*": ["db/*"],
+      "helpers/*": ["helpers/*"]
+      // add more top level folders in src if you need
+    },
+    "moduleResolution": "Bundler" // enables importing without specifcying .js/.ts
+```
