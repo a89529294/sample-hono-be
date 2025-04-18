@@ -180,61 +180,6 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<
         }>;
       }>
     >;
-    personnelPermission: _trpc_server_unstable_core_do_not_import.BuiltRouter<
-      {
-        ctx: {
-          c: hono.Context;
-        };
-        meta: object;
-        errorShape: _trpc_server_unstable_core_do_not_import.DefaultErrorShape;
-        transformer: false;
-      },
-      _trpc_server_unstable_core_do_not_import.DecorateCreateRouterOptions<{
-        createUserForEmployee: _trpc_server.TRPCMutationProcedure<{
-          input: {
-            employeeId: string;
-          };
-          output: {
-            name: string;
-            id: string;
-            created_at: Date;
-            updated_at: Date;
-            account: string;
-            employeeId: string | null;
-            passwordHash: string;
-          };
-        }>;
-        createUserWithRoles: _trpc_server.TRPCMutationProcedure<{
-          input: {
-            name: string;
-            account: string;
-            roleIds: string[];
-          };
-          output: {
-            name: string;
-            id: string;
-            created_at: Date;
-            updated_at: Date;
-            account: string;
-            employeeId: string | null;
-            passwordHash: string;
-          };
-        }>;
-        getAppUserByPermission: _trpc_server.TRPCQueryProcedure<{
-          input: {
-            permission: 'man-production' | 'ctr-gdstd' | 'monitor-weight';
-          };
-          output: {
-            created_at: Date;
-            updated_at: Date;
-            id: string;
-            account: string;
-            passwordHash: string;
-            employeeId: string;
-          }[];
-        }>;
-      }>
-    >;
   }>
 >;
 type AppRouter = typeof appRouter;
