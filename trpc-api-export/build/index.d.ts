@@ -220,6 +220,19 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<
             passwordHash: string;
           };
         }>;
+        getAppUserByPermission: _trpc_server.TRPCQueryProcedure<{
+          input: {
+            permission: 'man-production' | 'ctr-gdstd' | 'monitor-weight';
+          };
+          output: {
+            created_at: Date;
+            updated_at: Date;
+            id: string;
+            account: string;
+            passwordHash: string;
+            employeeId: string;
+          }[];
+        }>;
       }>
     >;
   }>
