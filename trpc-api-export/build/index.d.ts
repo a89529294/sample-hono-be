@@ -220,7 +220,6 @@ declare const appRouter: _trpc_server_unstable_core_do_not_import.BuiltRouter<
             passwordHash: string;
           };
         }>;
-        getAppUserByPermission: any;
       }>
     >;
   }>
