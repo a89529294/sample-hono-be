@@ -17,6 +17,7 @@ import {
   employeeDepartmentsTable,
   appUsersTable,
   appUserPermissions,
+  appUserRefreshTokensTable,
 } from 'db/schema';
 import { db } from 'db/index';
 import { randomUUID } from 'crypto';
@@ -28,16 +29,19 @@ async function main() {
   console.log('Starting database seed...');
 
   // Clean all tables before seeding (order matters for FKs)
+  await db.delete(appUserRefreshTokensTable);
+  await db.delete(appUserPermissions);
   await db.delete(userRolesTable);
   await db.delete(roleDepartmentsTable);
   await db.delete(sessionsTable);
-  await db.delete(usersTable);
+  await db.delete(projectContactsTable);
   await db.delete(employeeDepartmentsTable);
+  await db.delete(usersTable);
+  await db.delete(appUsersTable);
   await db.delete(employeesTable);
   await db.delete(departmentsTable);
   await db.delete(permissionsTable);
   await db.delete(rolesTable);
-  await db.delete(projectContactsTable);
   await db.delete(projectsTable);
   await db.delete(contactsTable);
   await db.delete(customersTable);
@@ -237,6 +241,26 @@ async function main() {
       name: 'personnelPermission:delete',
       roleId: personnelPermissionManagementRoleId,
     },
+    {
+      id: randomUUID(),
+      name: 'appUser:read',
+      roleId: personnelPermissionManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: 'appUser:update',
+      roleId: personnelPermissionManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: 'appUser:create',
+      roleId: personnelPermissionManagementRoleId,
+    },
+    {
+      id: randomUUID(),
+      name: 'appUser:delete',
+      roleId: personnelPermissionManagementRoleId,
+    },
 
     // Basic Info Management permissions
     {
@@ -331,7 +355,7 @@ async function main() {
   await db.insert(appUsersTable).values({
     id: hrAppUserId,
     account: 'hr001', // same as employee idNumber
-    password: '$argon2id$v=19$m=19456,t=2,p=1$uYynoESvp104MjN0NXYc1g$dCuvbbaE9GoeJKmJaSGI8wCmBhBsmt97/2QNpg7zzKM',
+    passwordHash: '$argon2id$v=19$m=19456,t=2,p=1$uYynoESvp104MjN0NXYc1g$dCuvbbaE9GoeJKmJaSGI8wCmBhBsmt97/2QNpg7zzKM',
     employeeId: hrEmployeeId,
   });
   await db.insert(appUserPermissions).values([
@@ -363,6 +387,19 @@ async function main() {
     employeeId: financeEmployeeId,
     passwordHash: '$argon2id$v=19$m=19456,t=2,p=1$EGTc0PR3V8ihyus3qz/WJA$sbAvDU2mZOJw7XkmKzeBQl79a6JiJUaGTthKJuh+mP0',
   });
+
+  // Create app user for Finance employee (with only one permission)
+  const financeAppUserId = randomUUID();
+  await db.insert(appUsersTable).values({
+    id: financeAppUserId,
+    account: 'finance001', // same as employee idNumber
+    passwordHash: '$argon2id$v=19$m=19456,t=2,p=1$lCs2vAWLKYwFGeIU57d0eg$PefujxGXtY1J65Sx63pgPM9m/5uv9272VnsZV64xrXo',
+    employeeId: financeEmployeeId,
+  });
+  await db
+    .insert(appUserPermissions)
+    .values([{ id: randomUUID(), appUserId: financeAppUserId, permission: 'man-production' }]);
+  console.log('App user for Finance created!');
 
   // Marketing user
   const marketingEmployeeId = randomUUID();
